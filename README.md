@@ -1,4 +1,4 @@
-# talkit_private
+# Talkit
 iOS version of talkit
 
 ### Phase 1
