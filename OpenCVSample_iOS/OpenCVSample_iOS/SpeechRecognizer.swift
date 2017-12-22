@@ -44,6 +44,26 @@ class SpeechRecognizer: NSObject, SFSpeechRecognizerDelegate {
         return resultStrings
     }
     
+    func getResultWord() -> String {
+        var index = resultStrings.endIndex - 1
+        if index == 0 {
+            return resultStrings[index]
+        }
+        print("index", index)
+        let res1 = resultStrings[index]
+        var res2 = resultStrings[index - 1]
+        while (res1 == res2 && index >= 2) {
+            index = index - 1
+            res2 = resultStrings[index - 1]
+        }
+        if res1 == res2 {
+            return res1
+        }
+        else {
+            return String((res1 as NSString).substring(from: res2.count + 1))
+        }
+    }
+    
     func authorize() {
         SFSpeechRecognizer.requestAuthorization { authStatus in
             /*
@@ -100,6 +120,7 @@ class SpeechRecognizer: NSObject, SFSpeechRecognizerDelegate {
                 self.resultStringTemp = result.bestTranscription.formattedString
                 self.resultStrings.append(self.resultStringTemp)
                 print(self.resultStringTemp)
+                print("word:" + self.getResultWord())
                 isFinal = result.isFinal
             }
             
