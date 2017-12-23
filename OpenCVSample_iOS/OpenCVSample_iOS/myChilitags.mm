@@ -90,10 +90,13 @@ static UIImage *RestoreUIImageOrientation(UIImage *processed, UIImage *original)
 // fulfill the functions of our own using Chilitags or the function above
 @implementation myChilitags
 
+chilitags::Chilitags3D chilitags3D;
+chilitags::Chilitags chltgs;
+Boolean hasReadConfig = false;
+
 + (nonnull UIImage *)detectQRCode:(nonnull UIImage *)image {
     cv::Mat inputImageMat, outputImageMat;
     UIImage *outputImage;
-    chilitags::Chilitags chltgs;
     
     chltgs.setFilter(0, 0.0f);
     UIImageToMat(image, inputImageMat);
@@ -135,13 +138,14 @@ static UIImage *RestoreUIImageOrientation(UIImage *processed, UIImage *original)
                      PRECISION*corners(i),
                      PRECISION*corners((i+1)%4),
                      COLOR, 1, cv::LINE_AA, SHIFT);
+            //cv::line(outputImageMat, PRECISION*cv::Point2f(0, 0), PRECISION*cv::Point2f(640, 480), COLOR, 1, cv::LINE_AA, SHIFT);
             
         }
         cv::Point2f center = 0.5f*(corners(0) + corners(2));
         cv::putText(outputImageMat, cv::format("%d", id), center,
                     cv::FONT_HERSHEY_SIMPLEX, 0.5f, COLOR);
         cv::putText(outputImageMat,
-                    cv::format("%dx%d %4.0f ms (press q to quit)",
+                    cv::format("%dx%d %4.0f ms",
                                outputImageMat.cols, outputImageMat.rows,
                                processingTime),
                     cv::Point(100, 100),
@@ -162,18 +166,87 @@ static UIImage *RestoreUIImageOrientation(UIImage *processed, UIImage *original)
     return RestoreUIImageOrientation(outputImage, image);
 }
 
-+ (void)estimate3D:(nonnull UIImage *)image second:(nonnull NSString *) configFilePath{
++ (nonnull UIImage *)estimate3D:(nonnull UIImage *)image second:(nonnull NSString *) configFilePath{
     cv::Mat inputImageMat, outputImageMat;
+    UIImage *outputImage;
     UIImageToMat(image, inputImageMat);
-    chilitags::Chilitags3D chilitags3D;
+    outputImageMat = inputImageMat.clone();
     const char * configFile = NULL;
     if ([configFilePath canBeConvertedToEncoding:NSUTF8StringEncoding]) {
         configFile = [configFilePath cStringUsingEncoding:NSUTF8StringEncoding];
     }
-    chilitags3D.readTagConfiguration(configFile);
-    for (auto& kv : chilitags3D.estimate(inputImageMat)) {
-        std::cout << kv.first << " at " << cv::Mat(kv.second) << "\n";
+    if (!hasReadConfig) {
+        chilitags3D.readTagConfiguration(configFile);
+        hasReadConfig = true;
     }
+    cv::Mat transformationMatrix;
+    for (auto& kv : chilitags3D.estimate(inputImageMat)) {
+        //std::cout << kv.first << " at " << cv::Mat(kv.second) << "\n";
+        if (kv.first == "myobject") {
+            transformationMatrix = cv::Mat(kv.second);
+            cv::Mat intrisicMat(3, 3, cv::DataType<double>::type); // Intrisic matrix
+            intrisicMat.at<double>(0, 0) = 535.64909146;
+            intrisicMat.at<double>(0, 1) = 0.0;
+            intrisicMat.at<double>(0, 2) = 238.89091417;
+            intrisicMat.at<double>(1, 0) = 0.0;
+            intrisicMat.at<double>(1, 1) = 537.68143339;
+            intrisicMat.at<double>(1, 2) = 304.97880667;
+            intrisicMat.at<double>(2, 0) = 0.0;
+            intrisicMat.at<double>(2, 1) = 0.0;
+            intrisicMat.at<double>(2, 2) = 1.0;
+            
+            cv::Mat distCoeffs(5, 1, cv::DataType<double>::type);   // Distortion vector
+            distCoeffs.at<double>(0) = 3.36488923e-01;
+            distCoeffs.at<double>(1) = -1.53102171e+00;
+            distCoeffs.at<double>(2) = -1.36197858e-02;
+            distCoeffs.at<double>(3) = -8.02876162e-04;
+            distCoeffs.at<double>(4) = 3.45607604e-01;
+            
+            cv::Mat rVec(3, 3, cv::DataType<double>::type); // Rotation vector
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) rVec.at<double>(i, j) = transformationMatrix.at<float>(i, j);
+            }
+            cv:: Mat rVec2(3, 1, cv::DataType<double>::type);
+            cv::Rodrigues(rVec, rVec2);
+            
+            cv::Mat tVec(3, 1, cv::DataType<double>::type); // Translation vector
+            tVec.at<double>(0) = transformationMatrix.at<float>(0, 3);
+            tVec.at<double>(1) = transformationMatrix.at<float>(1, 3);
+            tVec.at<double>(2) = transformationMatrix.at<float>(2, 3);
+            
+            cv::Mat objectPoints(4, 3, cv::DataType<double>::type);
+            std::vector<cv::Point2d> imagePoints;
+            objectPoints.at<double>(0, 0) = 0;
+            objectPoints.at<double>(0, 1) = 0;
+            objectPoints.at<double>(0, 2) = 100;
+            objectPoints.at<double>(1, 0) = 0;
+            objectPoints.at<double>(1, 1) = 100;
+            objectPoints.at<double>(1, 2) = 0;
+            objectPoints.at<double>(2, 0) = 100;
+            objectPoints.at<double>(2, 1) = 0;
+            objectPoints.at<double>(2, 2) = 0;
+            objectPoints.at<double>(3, 0) = 0;
+            objectPoints.at<double>(3, 1) = 0;
+            objectPoints.at<double>(3, 2) = 0;
+            std::cout << transformationMatrix << std::endl;
+            std::cout << rVec << std::endl;
+            std::cout << rVec2 << std::endl;
+            std::cout << tVec << std::endl;
+            
+            cv::projectPoints(objectPoints, rVec, tVec, intrisicMat, distCoeffs, imagePoints);
+            const static cv::Scalar COLOR(0, 255, 0);
+            for (unsigned int i = 0; i < imagePoints.size(); ++i) {
+                std::cout << "Image point: " << imagePoints[i] << std::endl;
+                cv::line(
+                         outputImageMat,
+                         imagePoints[3],
+                         imagePoints[i],
+                         COLOR);
+            }
+        }
+    }
+    outputImage = MatToUIImage(outputImageMat);
+    return RestoreUIImageOrientation(outputImage, image);
 }
 
 @end

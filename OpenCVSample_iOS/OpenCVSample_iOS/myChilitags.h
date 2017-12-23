@@ -16,6 +16,6 @@
 // We just need to implement new functions here
 
 + (nonnull UIImage *)detectQRCode:(nonnull UIImage *)image;
-+ (void)estimate3D:(nonnull UIImage *)image second:(nonnull NSString *)configFilePath;
++ (nonnull UIImage *)estimate3D:(nonnull UIImage *)image second:(nonnull NSString *)configFilePath;
 
 @end

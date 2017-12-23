@@ -15,6 +15,7 @@
 		31A6B5E91B7ADB70003C88EA /* OpenCVSample_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A6B5E81B7ADB70003C88EA /* OpenCVSample_iOSTests.swift */; };
 		31A6B5F31B7ADBA4003C88EA /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31A6B5F21B7ADBA4003C88EA /* opencv2.framework */; };
 		31A6B5F41B7ADBA4003C88EA /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31A6B5F21B7ADBA4003C88EA /* opencv2.framework */; };
+		A54B57FC1FEE3169001EF568 /* JsonGlobe.json in Resources */ = {isa = PBXBuildFile; fileRef = A54B57FB1FEE3169001EF568 /* JsonGlobe.json */; };
 		A54EFB891FC2A9EF00899921 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54EFB881FC2A9EF00899921 /* SpeechRecognizer.swift */; };
 		A55974D91FC4F9FB003D4422 /* myOpenCV.mm in Sources */ = {isa = PBXBuildFile; fileRef = A55974D81FC4F9FB003D4422 /* myOpenCV.mm */; };
 		A5692B211FDE97F1001EA9E0 /* calibrationYAML.yml in Resources */ = {isa = PBXBuildFile; fileRef = A5692B1F1FDE97F0001EA9E0 /* calibrationYAML.yml */; };
@@ -62,6 +63,7 @@
 		31A6B5E81B7ADB70003C88EA /* OpenCVSample_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCVSample_iOSTests.swift; sourceTree = "<group>"; };
 		31A6B5F21B7ADBA4003C88EA /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
 		31A6B5F61B7ADEF4003C88EA /* OpenCVSample_iOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OpenCVSample_iOS-Bridging-Header.h"; sourceTree = "<group>"; };
+		A54B57FB1FEE3169001EF568 /* JsonGlobe.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = JsonGlobe.json; sourceTree = "<group>"; };
 		A54EFB881FC2A9EF00899921 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		A55974D81FC4F9FB003D4422 /* myOpenCV.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = myOpenCV.mm; sourceTree = "<group>"; };
 		A55974DA1FC4FA14003D4422 /* myOpenCV.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = myOpenCV.h; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 		31A6B5D01B7ADB70003C88EA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				A54B57FB1FEE3169001EF568 /* JsonGlobe.json */,
 				A5692B1F1FDE97F0001EA9E0 /* calibrationYAML.yml */,
 				A5692B201FDE97F1001EA9E0 /* tagYAML.yml */,
 				31A6B5D11B7ADB70003C88EA /* Info.plist */,
@@ -318,6 +321,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A54B57FC1FEE3169001EF568 /* JsonGlobe.json in Resources */,
 				31A6B5D81B7ADB70003C88EA /* Main.storyboard in Resources */,
 				A5692B211FDE97F1001EA9E0 /* calibrationYAML.yml in Resources */,
 				A5692B221FDE97F1001EA9E0 /* tagYAML.yml in Resources */,

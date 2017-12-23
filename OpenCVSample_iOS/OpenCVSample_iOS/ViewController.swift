@@ -20,11 +20,11 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
-        
-        print("load")
-        speechRecognizer.load()
-        speechRecognizer.start()
-
+        //speechRecognizer.load()
+        //speechRecognizer.start()
+        let jsonResult = getAndDecodeJSON("JsonGlobe", "json")
+        //let face = jsonResult[] as! Dictionary<String, Any>
+        //print(face["normal"])
 		// Prepare a video capturing session.
 		self.session = AVCaptureSession()
 		self.session.sessionPreset = AVCaptureSession.Preset.vga640x480 // not work in iOS simulator
@@ -113,12 +113,11 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 			capturedImage = UIImage(cgImage: image, scale: 1.0, orientation: UIImageOrientation.right)
 		}
 		
-		// This is a filtering sample.
-		
+        
         // Detect QR code in the image
         var resultImage = myChilitags.detectQRCode(capturedImage)
         if let configFilePath = Bundle.main.path(forResource: "tagYAML", ofType: "yml") {
-            myChilitags.estimate3D(capturedImage, second: configFilePath);
+            resultImage = myChilitags.estimate3D(capturedImage, second: configFilePath);
         }
         // Detect red fingers in the image
         //resultImage = myOpenCV.detectRed(resultImage)
@@ -128,5 +127,6 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 			self.imageView.image = resultImage
 		})
 	}
+
 }
 
