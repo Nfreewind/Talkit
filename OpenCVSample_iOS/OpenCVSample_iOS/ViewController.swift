@@ -22,9 +22,8 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 		super.viewDidLoad()
         //speechRecognizer.load()
         //speechRecognizer.start()
-        let jsonResult = getAndDecodeJSON("JsonGlobe", "json")
-        //let face = jsonResult[] as! Dictionary<String, Any>
-        //print(face["normal"])
+        
+        //print(normal)
 		// Prepare a video capturing session.
 		self.session = AVCaptureSession()
 		self.session.sessionPreset = AVCaptureSession.Preset.vga640x480 // not work in iOS simulator
@@ -116,8 +115,9 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
         // Detect QR code in the image
         var resultImage = myChilitags.detectQRCode(capturedImage)
-        if let configFilePath = Bundle.main.path(forResource: "tagYAML", ofType: "yml") {
-            resultImage = myChilitags.estimate3D(capturedImage, second: configFilePath);
+        if let configFilePath = Bundle.main.path(forResource: "tagYAML", ofType: "yml"), let modelFilePath = Bundle.main.path(forResource: "JsonGlobe", ofType: "json") {
+            //let configFilePathForOC = configFilePath as NSString
+            resultImage = myChilitags.estimate3D(capturedImage, configAt: configFilePath, modelAt: modelFilePath)
         }
         // Detect red fingers in the image
         //resultImage = myOpenCV.detectRed(resultImage)

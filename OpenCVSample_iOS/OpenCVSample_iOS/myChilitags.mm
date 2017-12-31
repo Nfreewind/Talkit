@@ -85,6 +85,10 @@ static UIImage *RestoreUIImageOrientation(UIImage *processed, UIImage *original)
     return [UIImage imageWithCGImage:processed.CGImage scale:1.0 orientation:original.imageOrientation];
 }
 
+static bool isInTheFront(double normal[], cv::Mat mat) {
+    return (normal[0] * mat.at<double>(2, 0) + normal[1] * mat.at<double>(2, 1) + normal[2] * mat.at<double>(2, 2)) < 0;
+}
+
 #pragma mark -
 
 // fulfill the functions of our own using Chilitags or the function above
@@ -93,6 +97,10 @@ static UIImage *RestoreUIImageOrientation(UIImage *processed, UIImage *original)
 chilitags::Chilitags3D chilitags3D;
 chilitags::Chilitags chltgs;
 Boolean hasReadConfig = false;
+Boolean hasReadJSON = false;
+NSDictionary* faces = NULL;
+cv::Mat objectPoints(3, 3, cv::DataType<double>::type);
+std::vector<cv::Point2d> imagePoints;
 
 + (nonnull UIImage *)detectQRCode:(nonnull UIImage *)image {
     cv::Mat inputImageMat, outputImageMat;
@@ -150,7 +158,7 @@ Boolean hasReadConfig = false;
                                processingTime),
                     cv::Point(100, 100),
                     cv::FONT_HERSHEY_SIMPLEX, 0.5f, COLOR);\
-        std::cout << center.x << " " << center.y << std::endl;
+//        std::cout << center.x << " " << center.y << std::endl;
         
     }
     
@@ -166,19 +174,38 @@ Boolean hasReadConfig = false;
     return RestoreUIImageOrientation(outputImage, image);
 }
 
-+ (nonnull UIImage *)estimate3D:(nonnull UIImage *)image second:(nonnull NSString *) configFilePath{
++ (nonnull UIImage *)estimate3D:(nonnull UIImage *)image configAt:(nonnull NSString *)configFilePath modelAt:(nonnull NSString*) modelFilePath {
     cv::Mat inputImageMat, outputImageMat;
     UIImage *outputImage;
     UIImageToMat(image, inputImageMat);
     outputImageMat = inputImageMat.clone();
     const char * configFile = NULL;
+    
     if ([configFilePath canBeConvertedToEncoding:NSUTF8StringEncoding]) {
         configFile = [configFilePath cStringUsingEncoding:NSUTF8StringEncoding];
+        //std::cout << configFile << std::endl;
     }
     if (!hasReadConfig) {
         chilitags3D.readTagConfiguration(configFile);
         hasReadConfig = true;
     }
+    
+    if (!hasReadJSON) {
+        //NSURL *url = [NSURL fileURLWithPath: modelFilePath];
+        NSString* jsonString = [[NSString alloc] initWithContentsOfFile:modelFilePath encoding:NSUTF8StringEncoding error:nil];
+        
+        NSData* jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+
+        NSDictionary* dic = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableLeaves error:nil];
+        
+        faces = [dic objectForKey:@"faces"];
+        
+        hasReadJSON = true;
+        
+        //objectPoints.resize((int)faces.count, 3);
+        
+    }
+    
     cv::Mat transformationMatrix;
     for (auto& kv : chilitags3D.estimate(inputImageMat)) {
         //std::cout << kv.first << " at " << cv::Mat(kv.second) << "\n";
@@ -206,42 +233,74 @@ Boolean hasReadConfig = false;
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) rVec.at<double>(i, j) = transformationMatrix.at<float>(i, j);
             }
-            cv:: Mat rVec2(3, 1, cv::DataType<double>::type);
-            cv::Rodrigues(rVec, rVec2);
+//            cv:: Mat rVec2(3, 1, cv::DataType<double>::type);
+//            cv::Rodrigues(rVec, rVec2);
             
             cv::Mat tVec(3, 1, cv::DataType<double>::type); // Translation vector
             tVec.at<double>(0) = transformationMatrix.at<float>(0, 3);
             tVec.at<double>(1) = transformationMatrix.at<float>(1, 3);
             tVec.at<double>(2) = transformationMatrix.at<float>(2, 3);
             
-            cv::Mat objectPoints(4, 3, cv::DataType<double>::type);
-            std::vector<cv::Point2d> imagePoints;
-            objectPoints.at<double>(0, 0) = 0;
-            objectPoints.at<double>(0, 1) = 0;
-            objectPoints.at<double>(0, 2) = 100;
-            objectPoints.at<double>(1, 0) = 0;
-            objectPoints.at<double>(1, 1) = 100;
-            objectPoints.at<double>(1, 2) = 0;
-            objectPoints.at<double>(2, 0) = 100;
-            objectPoints.at<double>(2, 1) = 0;
-            objectPoints.at<double>(2, 2) = 0;
-            objectPoints.at<double>(3, 0) = 0;
-            objectPoints.at<double>(3, 1) = 0;
-            objectPoints.at<double>(3, 2) = 0;
-            std::cout << transformationMatrix << std::endl;
-            std::cout << rVec << std::endl;
-            std::cout << rVec2 << std::endl;
-            std::cout << tVec << std::endl;
+            cv::Scalar color;
+            static const int SHIFT = 16;
+            static const float PRECISION = 1<<SHIFT;
             
-            cv::projectPoints(objectPoints, rVec, tVec, intrisicMat, distCoeffs, imagePoints);
-            const static cv::Scalar COLOR(0, 255, 0);
-            for (unsigned int i = 0; i < imagePoints.size(); ++i) {
-                std::cout << "Image point: " << imagePoints[i] << std::endl;
-                cv::line(
-                         outputImageMat,
-                         imagePoints[3],
-                         imagePoints[i],
-                         COLOR);
+            for (NSString *key in faces) {
+                NSDictionary *face = [faces objectForKey:key];
+                NSDictionary *normalDic = [face objectForKey:@"normal"];
+                NSString *normal_x = [normalDic objectForKey:@"x"];
+                NSString *normal_y = [normalDic objectForKey:@"y"];
+                NSString *normal_z = [normalDic objectForKey:@"z"];
+                double normal[3] = {normal_x.doubleValue, normal_y.doubleValue, normal_z.doubleValue};
+                if (isInTheFront(normal, rVec)) {
+                    NSDictionary *vertsDic = [face objectForKey:@"verts"];
+                    NSDictionary *vert1 = [vertsDic objectForKey:@"vert1"];
+                    NSDictionary *vert2 = [vertsDic objectForKey:@"vert2"];
+                    NSDictionary *vert3 = [vertsDic objectForKey:@"vert3"];
+                    NSString *num = [vert1 objectForKey:@"x"];
+                    objectPoints.at<double>(0, 0) = num.doubleValue;
+                    num = [vert1 objectForKey:@"y"];
+                    objectPoints.at<double>(0, 1) = num.doubleValue;
+                    num = [vert1 objectForKey:@"z"];
+                    objectPoints.at<double>(0, 2) = num.doubleValue;
+                    num = [vert2 objectForKey:@"x"];
+                    objectPoints.at<double>(1, 0) = num.doubleValue;
+                    num = [vert2 objectForKey:@"y"];
+                    objectPoints.at<double>(1, 1) = num.doubleValue;
+                    num = [vert2 objectForKey:@"z"];
+                    objectPoints.at<double>(1, 2) = num.doubleValue;
+                    num = [vert3 objectForKey:@"x"];
+                    objectPoints.at<double>(2, 0) = num.doubleValue;
+                    num = [vert3 objectForKey:@"y"];
+                    objectPoints.at<double>(2, 1) = num.doubleValue;
+                    num = [vert3 objectForKey:@"z"];
+                    objectPoints.at<double>(2, 2) = num.doubleValue;
+                    imagePoints.clear();
+                    cv::projectPoints(objectPoints, rVec, tVec, intrisicMat, distCoeffs, imagePoints);
+                    NSString *marked = [face objectForKey:@"marked"];
+                    NSLog(@"%@", marked);
+                    if ([marked  isEqual: @"true"]) {
+                        std::cout << "afaefafad" << std::endl;
+                        NSDictionary *colorDic = [face objectForKey:@"color"];
+                        NSString *color_r = [colorDic objectForKey:@"r"];
+                        NSString *color_g = [colorDic objectForKey:@"g"];
+                        NSString *color_b = [colorDic objectForKey:@"b"];
+                        color = cv::Scalar(color_r.doubleValue, color_g.doubleValue, color_b.doubleValue);
+                    }
+                    else color = cv::Scalar(0, 255, 0);
+                    cv::line(outputImageMat,
+                             PRECISION * imagePoints[0],
+                             PRECISION * imagePoints[1],
+                             color, 1, cv::LINE_AA, SHIFT);
+                    cv::line(outputImageMat,
+                             PRECISION * imagePoints[1],
+                             PRECISION * imagePoints[2],
+                             color, 1, cv::LINE_AA, SHIFT);
+                    cv::line(outputImageMat,
+                             PRECISION * imagePoints[2],
+                             PRECISION * imagePoints[0],
+                             color, 1, cv::LINE_AA, SHIFT);
+                }
             }
         }
     }

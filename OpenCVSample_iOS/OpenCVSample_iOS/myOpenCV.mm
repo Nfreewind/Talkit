@@ -158,7 +158,7 @@ static UIImage *RestoreUIImageOrientation(UIImage *processed, UIImage *original)
         
         iLastX = posX;
         iLastY = posY;
-        std::cout << iLastX << " " << iLastY << std::endl;
+        //std::cout << iLastX << " " << iLastY << std::endl;
     }
     
     outputImage = MatToUIImage(outputImageMat);

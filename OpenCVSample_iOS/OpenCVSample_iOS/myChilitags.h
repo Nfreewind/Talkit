@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Foundation/NSDictionary.h>
 
 @interface myChilitags : NSObject
 
@@ -16,6 +17,6 @@
 // We just need to implement new functions here
 
 + (nonnull UIImage *)detectQRCode:(nonnull UIImage *)image;
-+ (nonnull UIImage *)estimate3D:(nonnull UIImage *)image second:(nonnull NSString *)configFilePath;
++ (nonnull UIImage *)estimate3D:(nonnull UIImage *)image configAt:(nonnull NSString *)configFilePath modelAt:(nonnull NSString*) modelFilePath;
 
 @end

@@ -20,7 +20,6 @@
 		A55974D91FC4F9FB003D4422 /* myOpenCV.mm in Sources */ = {isa = PBXBuildFile; fileRef = A55974D81FC4F9FB003D4422 /* myOpenCV.mm */; };
 		A5692B211FDE97F1001EA9E0 /* calibrationYAML.yml in Resources */ = {isa = PBXBuildFile; fileRef = A5692B1F1FDE97F0001EA9E0 /* calibrationYAML.yml */; };
 		A5692B221FDE97F1001EA9E0 /* tagYAML.yml in Resources */ = {isa = PBXBuildFile; fileRef = A5692B201FDE97F1001EA9E0 /* tagYAML.yml */; };
-		A58901391FD5354B0063C1EB /* Get+DecodeJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58901381FD5354B0063C1EB /* Get+DecodeJSON.swift */; };
 		A5ADB5E41FB29FF6001460C7 /* Chilitags3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5ADB5C51FB29FF3001460C7 /* Chilitags3D.cpp */; };
 		A5ADB5E51FB29FF6001460C7 /* EstimatePose3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5ADB5C61FB29FF3001460C7 /* EstimatePose3D.cpp */; };
 		A5ADB5E61FB29FF6001460C7 /* GrowRoi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5ADB5C71FB29FF3001460C7 /* GrowRoi.cpp */; };
@@ -69,7 +68,6 @@
 		A55974DA1FC4FA14003D4422 /* myOpenCV.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = myOpenCV.h; sourceTree = "<group>"; };
 		A5692B1F1FDE97F0001EA9E0 /* calibrationYAML.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = calibrationYAML.yml; sourceTree = "<group>"; };
 		A5692B201FDE97F1001EA9E0 /* tagYAML.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tagYAML.yml; sourceTree = "<group>"; };
-		A58901381FD5354B0063C1EB /* Get+DecodeJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Get+DecodeJSON.swift"; sourceTree = "<group>"; };
 		A5ADB5C51FB29FF3001460C7 /* Chilitags3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Chilitags3D.cpp; sourceTree = "<group>"; };
 		A5ADB5C61FB29FF3001460C7 /* EstimatePose3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EstimatePose3D.cpp; sourceTree = "<group>"; };
 		A5ADB5C71FB29FF3001460C7 /* GrowRoi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GrowRoi.cpp; sourceTree = "<group>"; };
@@ -151,7 +149,6 @@
 				A5ADB5E31FB29FF6001460C7 /* myChilitags.mm */,
 				31A6B5D21B7ADB70003C88EA /* AppDelegate.swift */,
 				31A6B5D41B7ADB70003C88EA /* ViewController.swift */,
-				A58901381FD5354B0063C1EB /* Get+DecodeJSON.swift */,
 				31A6B5F61B7ADEF4003C88EA /* OpenCVSample_iOS-Bridging-Header.h */,
 				A54EFB881FC2A9EF00899921 /* SpeechRecognizer.swift */,
 				31A6B5D61B7ADB70003C88EA /* Main.storyboard */,
@@ -361,7 +358,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A58901391FD5354B0063C1EB /* Get+DecodeJSON.swift in Sources */,
 				A5ADB5E81FB29FF6001460C7 /* ReadBits.cpp in Sources */,
 				A5ADB5EF1FB29FF6001460C7 /* Refine.cpp in Sources */,
 				A5ADB5EA1FB29FF6001460C7 /* EnsureGreyscale.cpp in Sources */,
