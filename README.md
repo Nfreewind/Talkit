@@ -1,11 +1,17 @@
-# Talkit
-iOS version of talkit
+# Talkit++
+Talkit++ is an iOS application that plays audio and visual content as a user touches parts of a 3D print. With Talkit++, a visually impaired student can explore a printed model tactilely and use hand gestures and speech commands to get more information about certain elements in the model. Talkit++ detects the model and hand gestures using computer vision algorithms, simple accessories like paper stickers and printable trackers, and the built-in RGB camera on an iOS device. Based on the model’s position and the user’s input, Talkit++ speaks textual information, plays audio recordings, and displays visual animations.
 
-### Phase 1
+#### Dependencies
 
-An iOS app that can detect tags.
+You should be using these tools:
 
-#### Content
+1. macOS 10.12.6+
+2. Xcode 9.0+
+3. iPhone 7, 7p, 8, 8p, X
+
+- iPhone is not necessary to be 7+ now in Phase 1 since we are not using ARkit right now.
+
+#### Install
 
 This project contains the whole Xcode project except for the file `opencv2.framework`(too big to upload).
 
@@ -16,18 +22,6 @@ Then you can put the .framework file in folder `~/OpenCVSample_iOS`.
 The project also contains source code from `Chilitags`.
 
 `myChilitags.h` and `myChilitags.mm` are the functions of our own using `OpenCV` and `Chilitags`. They are linked to `ViewController.swift` by the bridging file.
-
-In this Phase, we implemented getting images from Camera, transfer it into `cv::Mat` and detect tags in it. Then we retransfer it into image and print it. The essential function is `detectLive(UIImage *)`.
-
-#### Dependencies
-
-You should be using these tools:
-
-1.  macOS 10.12.6+
-2.  Xcode 9.0+
-3.  iPhone 7, 7p, 8, 8p, X
-
-*   iPhone is not necessary to be 7+ now in Phase 1 since we are not using ARkit right now.
 
 #### Getting Started
 
@@ -40,44 +34,42 @@ If you wish to build a new project from our source code, you need to do those co
 1.  Add ` opencv2.framework` in OpenCVSample_iOS > Build Phases > Link Binary With Libraries
 2.  Add `$(SRCROOT)/OpenCVSample_iOS/include` in OpenCVSample_iOS > Build Settings > Header Search Paths
 
-#### Example
+* You need to have your Apple Developer Account. Go to General -> Identity -> Bundle Identifier and change the identifier to your own. Then choose the team below as your team.
 
-As you can see the following pictures, the detections of one tag, tags in cube and multiple tags are working just fine.
+![Get Started](docs/getStarted.png)
 
-![one tag](docs/test1.png)
+Then click the Run button and use it!
 
-![tags in cube](docs/test2.png)
+#### Usage
 
-![multiple tags](docs/test3.png)
+The application contains 3 main functions:
 
-### Phase 2
+1. Use camera to capture images, and detect the markers in it
+2. Calculate the marker's transform and render the model based on the transform
+3. Provide audio feedback and animations for interaction
 
-Color Recognition and Speech Recognition
+When you launch the application, you should see a few UIs and a see-through camera interface. Put your interactive 3D models in the range of camera, especially for the 3D marker, and you can see the rendered models. 
 
-#### Color Recognition
+Use a finger nailed with red sticker, then point at somewhere on the model. The model will instruct you :)
 
-Referenced from OpenCV C++ Tutorial
+#### Algorithms and Implementation
 
-https://opencv-srf.blogspot.com/2010/09/object-detection-using-color-seperation.html
+Take a look at our structure. Basically we have a `ViewController.swift` as a top layer controlling every component. It contains several modules:
 
-Because it only used OpenCV functions, I did not write it in the `myChilitags.mm` file.
+0. Prepare Video Session: In `viewDidLoad()`, you don't need to modify that
+1. UIs: model pick, camera calibration, animation playing
+2. Text-to-speech: receive texts from lower layers and speak for audio feedback
+3. **Process Image: Main function, the application calls `captureOutput()` every video frame, and the function sends each frame to lower levels for processing, then based on the results, the function perform different interactions accordingly** 
+   1. The lower level is `myChilitags.mm` and `myChilitags.h`. These codes implemented the image processing functions. They are written in Objective-C
+   2. Each frame the `captureOutput()` calls `processImage()`, detect the markers and produce `transformationMatrix` as a result
+   3. `detectLabel()` and `getLabels()` are functions that suits our project only. The user points at some area and the function returns the area's label for upper level to speak
+4. Utilities: GIF and Save current model, you don't need to modify that
+5. SpeechRecognizer and GIF player: They are for specific use and are separately written
 
-We used cv::inRange to detect certain color, in this case, red.
+![structure](docs/structure.PNG)
 
-Then remove small objects from the foreground using erode() and dilate()
+So, if you want to use our algorithms, you just need to understand the code and modify the `processImage()` function.
 
-Then calculate the center coordinates.
+#### Contact
 
-Job finished.
-
-
-
-#### Speech Recognition
-
-iOS10 provided APIs of speech recognition in real time using Audio Buffer.
-
-First we request for authorization of microphone and speech recognition.
-
-Then we begin the recognition task and get the result. It's simple.
-
-Job finished.
+If you have any question in using the project, please contact Zhuohao Zhang (saltfishzzh@gmail.com). He is happy to explain the project to you.	
